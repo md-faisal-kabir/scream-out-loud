@@ -3,22 +3,29 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 import dayjs from "dayjs";
 import monkey from "../images/monkey.png";
+import EditDetails from "./EditDetails";
+import MyButton from "../util/MyButton";
 
 //redux
 import { connect } from "react-redux";
+import { uploadImage, logoutUser } from "../redux/actions/userAction";
 
 //Mui
 import withStyles from "@material-ui/core/styles/withStyles";
 import Paper from "@material-ui/core/Paper";
-import { Typography } from "@material-ui/core";
 import Button from "@material-ui/core/Button";
 import MuiLink from "@material-ui/core/Link";
+import IconButton from "@material-ui/core/IconButton";
+import Tooltip from "@material-ui/core/Tooltip";
+import Typography from "@material-ui/core/Typography";
 
 //icons
 import AlternateEmailIcon from "@material-ui/icons/AlternateEmail";
 import PersonPinIcon from "@material-ui/icons/PersonPin";
 import LinkIcon from "@material-ui/icons/Link";
 import CalendarTodayIcon from "@material-ui/icons/CalendarToday";
+import EditIcon from "@material-ui/icons/Edit";
+import PowerSettingsNewIcon from "@material-ui/icons/PowerSettingsNew";
 
 const styles = (theme) => ({
   paper: {
@@ -74,6 +81,20 @@ const styles = (theme) => ({
 });
 
 class Profile extends Component {
+  handleUpload = (e) => {
+    const image = e.target.files[0];
+    const formData = new FormData();
+    formData.append("image", image, image.name);
+    this.props.uploadImage(formData);
+  };
+  handleEditIcon = () => {
+    let element = document.getElementById("imageUploader");
+    element.click();
+  };
+  handleLogout = () => {
+    this.props.logoutUser();
+  };
+
   render() {
     const {
       classes,
@@ -92,11 +113,23 @@ class Profile extends Component {
           <div className={classes.profile}>
             <div className="image-wrapper">
               <img className="profile-image" src={imageUrl} alt="profile" />
+              <input
+                type="file"
+                id="imageUploader"
+                hidden
+                onChange={(e) => this.handleUpload(e)}
+              />
+              <MyButton
+                tip="change profile picture"
+                onClick={this.handleEditIcon}
+              >
+                <EditIcon />
+              </MyButton>
             </div>
             <hr />
             <div className="profile-details">
-              <AlternateEmailIcon color="primary"></AlternateEmailIcon>
               <MuiLink component={Link} to={`/user/${handle}`} variant="h5">
+                <AlternateEmailIcon color="primary" />
                 {handle}
               </MuiLink>
               <hr />
@@ -133,6 +166,15 @@ class Profile extends Component {
               </Typography>
             </div>
           </div>
+          {/* <Tooltip title="Logout" placement="top">
+            <IconButton color="primary">
+              <KeyBoardReturn onClick={this.handleLogout} />
+            </IconButton>
+          </Tooltip> */}
+          <MyButton tip="Logout" onClick={this.handleLogout}>
+            <PowerSettingsNewIcon />
+          </MyButton>
+          <EditDetails />
         </Paper>
       ) : (
         <Paper className={classes.paper}>
@@ -173,9 +215,17 @@ const mapStateToProps = (state) => ({
   user: state.user,
 });
 
+const mapActionsToProps = {
+  uploadImage,
+  logoutUser,
+};
+
 Profile.propTypes = {
   user: PropTypes.object.isRequired,
   classes: PropTypes.object.isRequired,
 };
 
-export default connect(mapStateToProps)(withStyles(styles)(Profile));
+export default connect(
+  mapStateToProps,
+  mapActionsToProps
+)(withStyles(styles)(Profile));

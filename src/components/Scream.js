@@ -1,5 +1,9 @@
 import React, { Component } from "react";
 import { Link } from "react-router-dom";
+import MyButton from "../util/MyButton";
+import dayjs from "dayjs";
+import relativeTime from "dayjs/plugin/relativeTime";
+import PropTypes from "prop-types";
 
 //MUI
 import { withStyles } from "@material-ui/core/styles";
@@ -8,8 +12,13 @@ import CardContent from "@material-ui/core/CardContent";
 import Typography from "@material-ui/core/Typography";
 import { CardMedia } from "@material-ui/core";
 
-import dayjs from "dayjs";
-import relativeTime from "dayjs/plugin/relativeTime";
+//icons
+import ChatIcon from "@material-ui/icons/Chat";
+import FavoriteBorderIcon from "@material-ui/icons/FavoriteBorder";
+
+//redux
+import { connect } from "react-redux";
+import { likeScream, unlikeScream } from "../redux/actions/dataAction";
 
 const styles = {
   card: {
@@ -27,25 +36,27 @@ const styles = {
 
 class Scream extends Component {
   render() {
+    const likeButton = (
+      <MyButton tip="like">
+        <FavoriteBorderIcon color="primary" />
+      </MyButton>
+    );
+
     dayjs.extend(relativeTime);
     const {
       classes,
       scream: {
         body,
         userHandle,
-        userImage,
+        imageUrl,
         createdAt,
         likeCount,
-        CommentCount,
+        commentCount,
       },
     } = this.props;
     return (
       <Card className={classes.card}>
-        <CardMedia
-          image={userImage}
-          title="profile"
-          className={classes.image}
-        />
+        <CardMedia image={imageUrl} title="profile" className={classes.image} />
         <CardContent className={classes.content}>
           <Typography
             variant="h6"
@@ -59,10 +70,36 @@ class Scream extends Component {
             {dayjs(createdAt).fromNow()}
           </Typography>
           <Typography variant="body1">{body}</Typography>
+          {likeButton}
+          <span>{likeCount}</span>
+          <MyButton tip="comment">
+            <ChatIcon color="primary" />
+          </MyButton>
+          <span>{commentCount}</span>
         </CardContent>
       </Card>
     );
   }
 }
 
-export default withStyles(styles)(Scream);
+Scream.propTypes = {
+  likeScream: PropTypes.func.isRequired,
+  unlikeScream: PropTypes.func.isRequired,
+  user: PropTypes.object.isRequired,
+  scream: PropTypes.object.isRequired,
+  classes: PropTypes.object.isRequired,
+};
+
+const mapStateToProps = (state) => ({
+  user: state.user,
+});
+
+const mapActionToProps = {
+  likeScream,
+  unlikeScream,
+};
+
+export default connect(
+  mapStateToProps,
+  mapActionToProps
+)(withStyles(styles)(Scream));

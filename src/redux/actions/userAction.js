@@ -65,6 +65,28 @@ export const getUserData = () => (dispatch) => {
     .catch((error) => console.log(error));
 };
 
+export const uploadImage = (formData) => (dispatch) => {
+  dispatch({ type: LOADING_USER });
+  axios
+    .post("/user/image", formData)
+    .then(() => {
+      dispatch(getUserData());
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+};
+
+export const editDetails = (userDetail) => (dispatch) => {
+  dispatch({ type: LOADING_USER });
+  axios
+    .post("/user", userDetail)
+    .then(() => {
+      dispatch(getUserData());
+    })
+    .catch((err) => console.error(err.code));
+};
+
 const setAuthorizationHeader = (token) => {
   const FBIdToken = `Bearer ${token}`;
   localStorage.setItem("FBIdToken", FBIdToken);
